@@ -1,0 +1,19 @@
+version: "3.9"
+
+# Local development only. In production the backend connects to your own
+# on-prem Postgres server over VPN/SSH tunnel (see backend/.env.example) -
+# this compose file is not used in production.
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: feedback_user
+      POSTGRES_PASSWORD: devpassword
+      POSTGRES_DB: feedback_portal
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
