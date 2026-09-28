@@ -73,7 +73,10 @@ python -m venv .venv && .venv\Scripts\activate
 pip install -r requirements.txt
 copy .env.example .env   # then edit DATABASE_URL, JWT_SECRET, admin bootstrap creds
 ```
-Start Postgres for local dev: `docker compose up -d` (root of repo).
+Start Postgres for local dev: `docker compose up -d` (root of repo) - it
+publishes on `localhost:5442`, not 5432, to avoid colliding with a native
+Postgres install some machines already have running on 5432. See
+[SETUP.md](SETUP.md) for the full walkthrough and troubleshooting.
 ```bash
 alembic upgrade head
 uvicorn app.main:app --reload

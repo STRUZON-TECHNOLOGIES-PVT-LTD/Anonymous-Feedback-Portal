@@ -1,5 +1,3 @@
-version: "3.9"
-
 # Local development only. In production the backend connects to your own
 # on-prem Postgres server over VPN/SSH tunnel (see backend/.env.example) -
 # this compose file is not used in production.
@@ -11,7 +9,11 @@ services:
       POSTGRES_PASSWORD: devpassword
       POSTGRES_DB: feedback_portal
     ports:
-      - "5432:5432"
+      # Published on 5442, not 5432: many dev machines already have a native
+      # Postgres installed and listening on 5432 (services, pgAdmin, etc.) -
+      # using a distinct port avoids silently colliding with or connecting to
+      # the wrong instance.
+      - "5442:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
