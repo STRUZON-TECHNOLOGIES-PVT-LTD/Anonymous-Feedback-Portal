@@ -1,11 +1,15 @@
 import uuid
 from datetime import datetime
 
-from sqlalchemy import JSON, DateTime, ForeignKey, Integer, String, Text, func
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import JSON, DateTime, ForeignKey, Integer, String, Text, Uuid, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
+
+# Generic Uuid type (SQLAlchemy >= 2.0): renders as native UUID on PostgreSQL
+# (identical schema to the dialect-specific postgresql.UUID it replaces), while
+# also compiling on SQLite so the model layer can run offline test suites
+# without a live Postgres instance.
 
 
 class Question(Base):
@@ -24,7 +28,7 @@ class Question(Base):
 class Submission(Base):
     __tablename__ = "submissions"
 
-    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True, default=uuid.uuid4)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     confession_text: Mapped[str | None] = mapped_column(Text, nullable=True)
@@ -52,7 +56,7 @@ class Answer(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     submission_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("submissions.id", ondelete="CASCADE")
+        Uuid, ForeignKey("submissions.id", ondelete="CASCADE")
     )
     question_id: Mapped[int] = mapped_column(Integer, ForeignKey("questions.id"))
     selected_option: Mapped[str] = mapped_column(String(200), nullable=False)
@@ -71,7 +75,7 @@ class ExtractedName(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     submission_id: Mapped[uuid.UUID] = mapped_column(
-        UUID(as_uuid=True), ForeignKey("submissions.id", ondelete="CASCADE")
+        Uuid, ForeignKey("submissions.id", ondelete="CASCADE")
     )
     name: Mapped[str] = mapped_column(String(200), nullable=False)
     normalized_name: Mapped[str] = mapped_column(String(200), nullable=False, index=True)

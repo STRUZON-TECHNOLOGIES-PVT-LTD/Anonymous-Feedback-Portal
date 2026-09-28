@@ -19,17 +19,59 @@ _SENTENCE_SPLIT = re.compile(r"(?<=[.!?])\s+")
 _WORD = re.compile(r"[A-Za-z][A-Za-z'-]*")
 
 # Common capitalized words that are not names: days, months, pronoun "I", and
-# frequent sentence-initial / workplace-generic capitalized words.
+# frequent sentence-initial / workplace-generic capitalized words. Contractions
+# ("I'm", "We're", ...) are included because a sentence-initial contraction
+# matches the capitalized-word heuristic but is never a person name.
 _STOPWORDS = {
     "i",
+    "i'm",
+    "i've",
+    "i'd",
+    "i'll",
     "the",
     "a",
     "an",
     "he",
+    "he's",
     "she",
-    "they",
+    "she's",
     "we",
+    "we're",
+    "we've",
+    "we'd",
+    "we'll",
     "you",
+    "you're",
+    "you've",
+    "you'd",
+    "you'll",
+    "they",
+    "they're",
+    "they've",
+    "they'd",
+    "they'll",
+    "it's",
+    "that's",
+    "there's",
+    "here's",
+    "who's",
+    "what's",
+    "don't",
+    "doesn't",
+    "didn't",
+    "can't",
+    "couldn't",
+    "wouldn't",
+    "shouldn't",
+    "won't",
+    "isn't",
+    "aren't",
+    "wasn't",
+    "weren't",
+    "haven't",
+    "hasn't",
+    "hadn't",
+    "let's",
     "monday",
     "tuesday",
     "wednesday",
@@ -87,7 +129,20 @@ _STOPWORDS = {
 MIN_NAME_LEN = 3
 
 
-def extract_names(text: str) -> list[str]:
+def normalize_name(name: str) -> str:
+    """Key used for grouping/counting a name across submissions.
+
+    Strips a trailing possessive "'s" (\"John's\" and \"John\" in different
+    confessions are the same lead) while keeping the original token as the
+    display name.
+    """
+    lowered = name.lower()
+    if lowered.endswith("'s"):
+        lowered = lowered[:-2]
+    return lowered
+
+
+def extract_names(text: str | None) -> list[str]:
     if not text:
         return []
 
@@ -122,11 +177,12 @@ def extract_names(text: str) -> list[str]:
             candidates.append(" ".join(run))
 
     # De-duplicate within a single submission (a name mentioned 3x in one
-    # confession should count once towards cross-submission repetition).
+    # confession should count once towards cross-submission repetition), keyed
+    # by the same normalization the DB uses so \"John's\" and \"John\" collapse.
     seen: set[str] = set()
     unique: list[str] = []
     for name in candidates:
-        key = name.lower()
+        key = normalize_name(name)
         if key not in seen:
             seen.add(key)
             unique.append(name)
