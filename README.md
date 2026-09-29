@@ -84,6 +84,20 @@ uvicorn app.main:app --reload
 API docs at `http://localhost:8000/docs`. On first startup the app seeds the
 10 default questions and creates the bootstrap admin from `.env` if none exists.
 
+**Backend tests** (no Postgres or Docker needed)
+```bash
+cd backend
+pip install -e ".[dev]"
+python -m pytest tests/
+```
+The suite runs fully offline against a throwaway SQLite file (aiosqlite) -
+same ORM models, no external services. It covers submission validation
+(active questions only, duplicate-answer rejection, honeypot and
+fill-time bot checks), name extraction, hashing/JWT helpers, both bot
+rate limits, admin auth, submission pagination/detail (incl. the invalid-UUID
+404 path) and the stats aggregation (30-day zero-fill, repeated
+fingerprints/names).
+
 **Frontend**
 ```bash
 cd frontend

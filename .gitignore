@@ -3,11 +3,19 @@ backend/venv/
 backend/__pycache__/
 backend/**/__pycache__/
 backend/.env
+.venv/
+.pytest_cache/
+backend/.pytest_cache/
+backend/tests/*.db
 
 # Node
 frontend/node_modules/
 frontend/dist/
 frontend/.env
+# tsc/vite build artifacts (regenerated on every build)
+frontend/*.tsbuildinfo
+frontend/vite.config.js
+frontend/vite.config.d.ts
 
 # OS / editor
 .DS_Store

@@ -26,6 +26,7 @@ class Settings(BaseSettings):
     frontend_origins: str = "http://localhost:5173"
 
     submit_rate_limit: str = "5/hour"
+    login_rate_limit: str = "10/minute"
     trust_proxy_headers: bool = False
 
     @property

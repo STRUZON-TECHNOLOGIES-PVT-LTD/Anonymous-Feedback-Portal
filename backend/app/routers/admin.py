@@ -1,6 +1,7 @@
+import uuid
 from datetime import datetime, timedelta, timezone
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -9,6 +10,7 @@ from app.config import get_settings
 from app.database import get_db
 from app.deps import get_current_admin
 from app.models import Admin, Answer, ExtractedName, Question, Submission
+from app.rate_limit import limiter
 from app.schemas import (
     AdminLoginIn,
     AdminOut,
@@ -33,7 +35,13 @@ REPEATED_FINGERPRINT_MIN_COUNT = 2
 
 
 @router.post("/login", response_model=AdminOut)
-async def login(payload: AdminLoginIn, response: Response, db: AsyncSession = Depends(get_db)):
+@limiter.limit(settings.login_rate_limit)
+async def login(
+    request: Request,
+    payload: AdminLoginIn,
+    response: Response,
+    db: AsyncSession = Depends(get_db),
+):
     result = await db.execute(select(Admin).where(Admin.username == payload.username))
     admin = result.scalar_one_or_none()
 
@@ -106,9 +114,17 @@ async def get_submission(
     admin: Admin = Depends(get_current_admin),
     db: AsyncSession = Depends(get_db),
 ):
+    # A non-UUID path segment used to reach PostgreSQL as `WHERE id = 'garbage'`
+    # and explode with a DataError → 500 instead of a clean 404. Validate the
+    # shape before it ever hits the query.
+    try:
+        submission_uuid = uuid.UUID(submission_id)
+    except ValueError:
+        raise HTTPException(status_code=404, detail="Submission not found")
+
     result = await db.execute(
         select(Submission)
-        .where(Submission.id == submission_id)
+        .where(Submission.id == submission_uuid)
         .options(
             selectinload(Submission.answers).selectinload(Answer.question),
             selectinload(Submission.extracted_names),
@@ -148,7 +164,17 @@ async def get_stats(admin: Admin = Depends(get_current_admin), db: AsyncSession 
         .group_by(func.date(Submission.created_at))
         .order_by(func.date(Submission.created_at))
     )
-    submissions_last_30_days = [DailyCount(date=str(d), count=c) for d, c in daily_result.all()]
+    counts_by_day = {str(d): c for d, c in daily_result.all()}
+
+    # Zero-fill the trailing 30 calendar days (today-29 .. today) so a day with
+    # no submissions renders as 0 on the trend chart instead of a gap: sparse
+    # series made the dashboard look like data was missing.
+    today = datetime.now(timezone.utc).date()
+    window_start = today - timedelta(days=29)
+    submissions_last_30_days = []
+    for offset in range(30):
+        day = (window_start + timedelta(days=offset)).isoformat()
+        submissions_last_30_days.append(DailyCount(date=day, count=counts_by_day.get(day, 0)))
 
     questions_result = await db.execute(select(Question).where(Question.active.is_(True)).order_by(Question.order))
     questions = questions_result.scalars().all()

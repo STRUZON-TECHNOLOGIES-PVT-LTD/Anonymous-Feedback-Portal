@@ -1,0 +1,40 @@
+[project]
+name = "anonymous-feedback-portal"
+version = "1.0.0"
+description = "FastAPI backend for the Anonymous Feedback Portal (submissions + admin dashboard)."
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi==0.115.0",
+    "uvicorn[standard]==0.30.6",
+    "sqlalchemy==2.0.35",
+    "asyncpg==0.29.0",
+    "alembic==1.13.2",
+    "pydantic==2.9.2",
+    "pydantic-settings==2.5.2",
+    "python-jose[cryptography]==3.3.0",
+    "passlib==1.7.4",
+    "bcrypt==4.0.1",
+    "slowapi==0.1.9",
+    "python-dotenv==1.0.1",
+    "greenlet==3.1.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "httpx",
+    "aiosqlite",
+    "ruff",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+# aiosqlite lets the whole suite run offline; no Postgres needed.
+
+[tool.ruff]
+line-length = 110
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["F", "E9", "I"]

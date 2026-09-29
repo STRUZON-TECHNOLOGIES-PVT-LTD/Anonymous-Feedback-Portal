@@ -10,7 +10,7 @@ from app.config import get_settings
 from app.database import get_db
 from app.deps import client_ip
 from app.models import Answer, ExtractedName, Question, Submission
-from app.name_extraction import extract_names
+from app.name_extraction import extract_names, normalize_name
 from app.rate_limit import limiter
 from app.schemas import FeedbackSubmitIn, FeedbackSubmitOut, QuestionOut
 
@@ -45,8 +45,16 @@ async def submit_feedback(
         return FeedbackSubmitOut(id=uuid.uuid4(), submitted_at=datetime.now(timezone.utc))
 
     question_ids = [a.question_id for a in payload.answers]
+    if len(question_ids) != len(set(question_ids)):
+        raise HTTPException(status_code=400, detail="Duplicate question_id in answers")
     if question_ids:
-        result = await db.execute(select(Question.id).where(Question.id.in_(question_ids)))
+        # Only ACTIVE questions accept answers: a question disabled or retired
+        # in the admin panel must stop collecting new responses immediately,
+        # otherwise its (now-hidden) answers still count towards total stats
+        # while being invisible in the per-question breakdown.
+        result = await db.execute(
+            select(Question.id).where(Question.id.in_(question_ids), Question.active.is_(True))
+        )
         valid_ids = {row[0] for row in result.all()}
         if not set(question_ids).issubset(valid_ids):
             raise HTTPException(status_code=400, detail="Invalid question_id in answers")
@@ -73,7 +81,9 @@ async def submit_feedback(
 
     if payload.confession_text:
         for name in extract_names(payload.confession_text):
-            submission.extracted_names.append(ExtractedName(name=name, normalized_name=name.lower()))
+            submission.extracted_names.append(
+                ExtractedName(name=name, normalized_name=normalize_name(name))
+            )
 
     db.add(submission)
     await db.commit()
