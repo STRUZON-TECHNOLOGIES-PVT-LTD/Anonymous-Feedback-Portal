@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { api } from "../api/client";
 import type { Question } from "../api/types";
 import { collectDeviceInfo } from "../utils/fingerprint";
+import struzonLogo from "../assets/struzon-logo.png";
 
 export function SubmitFeedback() {
   const [questions, setQuestions] = useState<Question[]>([]);
@@ -74,9 +75,7 @@ export function SubmitFeedback() {
     <div className="feedback-portal">
       {glowBlobs}
       <div className="fp-content">
-        <div className="fp-eyebrow">
-          <span className="crimson">STRUZON</span> <span className="navy">Technologies</span>
-        </div>
+        <img src={struzonLogo} alt="Struzon Technologies" className="fp-logo" />
         <h1 className="fp-title">Anonymous Feedback Portal</h1>
         <p className="fp-subtitle">
           Share a confession, question, or concern, and answer a few quick questions. No account or login is

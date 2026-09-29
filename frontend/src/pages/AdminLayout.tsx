@@ -1,4 +1,5 @@
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
+import struzonIcon from "../assets/struzon-icon.png";
 import { useAuth } from "../utils/auth";
 
 export function AdminLayout() {
@@ -32,9 +33,12 @@ export function AdminLayout() {
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
-          <span style={{ color: "#ffffff", fontWeight: 700, letterSpacing: "0.02em" }}>
-            STRUZON <span style={{ fontWeight: 400, opacity: 0.85 }}>Technologies</span>
-          </span>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <img src={struzonIcon} alt="" style={{ height: 30, width: "auto" }} />
+            <span style={{ color: "#ffffff", fontWeight: 700, letterSpacing: "0.02em" }}>
+              STRUZON <span style={{ fontWeight: 400, opacity: 0.85 }}>Technologies</span>
+            </span>
+          </div>
           <nav style={{ display: "flex", gap: 8 }}>
             <NavLink to="/admin" end style={linkStyle}>
               Submissions

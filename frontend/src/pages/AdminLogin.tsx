@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import struzonLogo from "../assets/struzon-logo.png";
 import { useAuth } from "../utils/auth";
 
 export function AdminLogin() {
@@ -26,9 +27,7 @@ export function AdminLogin() {
 
   return (
     <div style={{ maxWidth: 360, margin: "100px auto", padding: "0 16px" }}>
-      <div className="brand-mark" style={{ fontSize: 14, marginBottom: 4, textAlign: "center" }}>
-        <span className="crimson">STRUZON</span> <span className="navy">Technologies</span>
-      </div>
+      <img src={struzonLogo} alt="Struzon Technologies" style={{ height: 40, margin: "0 auto 12px", display: "block" }} />
       <h2 style={{ textAlign: "center" }}>Admin login</h2>
       <form onSubmit={handleSubmit} className="card">
         <label htmlFor="username" style={{ display: "block", marginBottom: 4 }}>

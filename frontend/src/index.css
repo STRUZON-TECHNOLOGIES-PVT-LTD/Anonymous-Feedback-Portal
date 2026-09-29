@@ -174,17 +174,6 @@ textarea:focus {
   color: var(--text-secondary);
 }
 
-.brand-mark {
-  font-weight: 700;
-  letter-spacing: 0.02em;
-}
-.brand-mark .crimson {
-  color: var(--crimson-600);
-}
-.brand-mark .navy {
-  color: var(--navy-700);
-}
-
 .btn-primary {
   padding: 12px 24px;
   border-radius: 8px;
@@ -257,18 +246,10 @@ textarea:focus {
   margin: 0 auto;
 }
 
-.fp-eyebrow {
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  font-size: 13px;
-  text-transform: uppercase;
-}
-.fp-eyebrow .crimson {
-  color: var(--crimson-600);
-}
-.fp-eyebrow .navy {
-  color: var(--ocean-600);
-  font-weight: 500;
+.fp-logo {
+  height: 40px;
+  width: auto;
+  display: block;
 }
 
 .fp-title {
