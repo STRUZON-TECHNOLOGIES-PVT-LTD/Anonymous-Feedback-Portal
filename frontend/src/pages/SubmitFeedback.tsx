@@ -48,101 +48,116 @@ export function SubmitFeedback() {
     }
   }
 
+  const glowBlobs = (
+    <>
+      <div className="fp-glow fp-glow-crimson" aria-hidden="true" />
+      <div className="fp-glow fp-glow-ocean" aria-hidden="true" />
+    </>
+  );
+
   if (status === "done") {
     return (
-      <div style={{ maxWidth: 640, margin: "80px auto", padding: "0 16px", textAlign: "center" }}>
-        <h2>Thank you.</h2>
-        <p className="secondary">Your feedback has been submitted anonymously.</p>
+      <div className="feedback-portal">
+        {glowBlobs}
+        <div className="fp-content" style={{ textAlign: "center", paddingTop: 80 }}>
+          <div className="fp-glass" style={{ padding: 48 }}>
+            <div style={{ fontSize: 40, marginBottom: 16, color: "var(--crimson-600)" }}>✓</div>
+            <h2 style={{ marginBottom: 8 }}>Thank you.</h2>
+            <p className="secondary">Your feedback has been submitted anonymously.</p>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div style={{ maxWidth: 640, margin: "40px auto", padding: "0 16px" }}>
-      <h1>Anonymous Feedback Portal</h1>
-      <p className="secondary">
-        Share a confession, question, or concern, and answer a few quick questions. No account or login is
-        required.
-      </p>
-
-      <form onSubmit={handleSubmit}>
-        <div className="card" style={{ marginBottom: 20 }}>
-          <label htmlFor="confession" style={{ display: "block", fontWeight: 600, marginBottom: 8 }}>
-            Your confession, query, or feedback
-          </label>
-          <textarea
-            id="confession"
-            rows={6}
-            value={confessionText}
-            onChange={(e) => setConfessionText(e.target.value)}
-            placeholder="Write anything you'd like management to know..."
-            style={{ width: "100%", padding: 10, borderRadius: 8, border: "1px solid var(--border)", resize: "vertical" }}
-          />
-
-          {/* Honeypot: hidden from real users via CSS, bots that fill every field trip it. */}
-          <div style={{ position: "absolute", left: "-9999px" }} aria-hidden="true">
-            <label htmlFor="website">Website</label>
-            <input
-              id="website"
-              name="website"
-              tabIndex={-1}
-              autoComplete="off"
-              onChange={(e) => (e.target.value ? setError("") : null)}
-            />
-          </div>
+    <div className="feedback-portal">
+      {glowBlobs}
+      <div className="fp-content">
+        <div className="fp-eyebrow">
+          <span className="crimson">STRUZON</span> <span className="navy">Technologies</span>
         </div>
+        <h1 className="fp-title">Anonymous Feedback Portal</h1>
+        <p className="fp-subtitle">
+          Share a confession, question, or concern, and answer a few quick questions. No account or login is
+          required — nothing here is tied back to you.
+        </p>
 
-        {questions.map((q) => (
-          <div key={q.id} className="card" style={{ marginBottom: 12 }}>
-            <div style={{ fontWeight: 600, marginBottom: 10 }}>{q.text}</div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-              {q.options.map((opt) => {
-                const selected = answers[q.id] === opt;
-                return (
-                  <button
-                    type="button"
-                    key={opt}
-                    onClick={() => setAnswers((prev) => ({ ...prev, [q.id]: opt }))}
-                    style={{
-                      padding: "8px 14px",
-                      borderRadius: 20,
-                      border: selected ? "1px solid var(--series-1)" : "1px solid var(--border)",
-                      background: selected ? "var(--series-1)" : "var(--surface-1)",
-                      color: selected ? "#fff" : "var(--text-primary)",
-                      cursor: "pointer",
-                    }}
-                  >
-                    {opt}
-                  </button>
-                );
-              })}
+        <form onSubmit={handleSubmit}>
+          <section className="fp-section">
+            <div className="fp-section-header">
+              <div className="fp-section-kicker">Section 01</div>
+              <div className="fp-section-title">Feedback</div>
+              <p className="fp-section-hint">Share a confession, question, or concern in your own words</p>
             </div>
-          </div>
-        ))}
 
-        {error && (
-          <p style={{ color: "var(--status-critical)" }} role="alert">
-            {error}
-          </p>
-        )}
+            <div className="fp-glass">
+              <textarea
+                id="confession"
+                rows={6}
+                value={confessionText}
+                onChange={(e) => setConfessionText(e.target.value)}
+                placeholder="Write anything you'd like management to know..."
+                className="fp-textarea"
+              />
 
-        <button
-          type="submit"
-          disabled={status === "submitting" || questions.length === 0}
-          style={{
-            padding: "12px 24px",
-            borderRadius: 8,
-            border: "none",
-            background: "var(--series-1)",
-            color: "#fff",
-            fontWeight: 600,
-            cursor: "pointer",
-            width: "100%",
-          }}
-        >
-          {status === "submitting" ? "Submitting..." : "Submit anonymously"}
-        </button>
-      </form>
+              {/* Honeypot: hidden from real users via CSS, bots that fill every field trip it. */}
+              <div style={{ position: "absolute", left: "-9999px" }} aria-hidden="true">
+                <label htmlFor="website">Website</label>
+                <input
+                  id="website"
+                  name="website"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  onChange={(e) => (e.target.value ? setError("") : null)}
+                />
+              </div>
+            </div>
+          </section>
+
+          <section className="fp-section">
+            <div className="fp-section-header">
+              <div className="fp-section-kicker">Section 02</div>
+              <div className="fp-section-title">Questionnaire</div>
+              <p className="fp-section-hint">{questions.length || 10} short questions, tap to answer</p>
+            </div>
+
+            <div className="fp-glass">
+              {questions.map((q) => (
+                <div key={q.id} className="fp-question">
+                  <div className="fp-question-text">{q.text}</div>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
+                    {q.options.map((opt) => {
+                      const selected = answers[q.id] === opt;
+                      return (
+                        <button
+                          type="button"
+                          key={opt}
+                          onClick={() => setAnswers((prev) => ({ ...prev, [q.id]: opt }))}
+                          className={`fp-pill${selected ? " selected" : ""}`}
+                        >
+                          {opt}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+              {questions.length === 0 && !error && <p className="muted" style={{ margin: 0 }}>Loading questions...</p>}
+            </div>
+          </section>
+
+          {error && (
+            <p className="fp-alert-error" role="alert">
+              {error}
+            </p>
+          )}
+
+          <button type="submit" className="fp-submit" disabled={status === "submitting" || questions.length === 0}>
+            {status === "submitting" ? "Submitting..." : "Submit anonymously"}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

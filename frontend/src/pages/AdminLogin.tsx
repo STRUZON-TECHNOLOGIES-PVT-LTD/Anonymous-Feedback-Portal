@@ -26,7 +26,10 @@ export function AdminLogin() {
 
   return (
     <div style={{ maxWidth: 360, margin: "100px auto", padding: "0 16px" }}>
-      <h2>Admin login</h2>
+      <div className="brand-mark" style={{ fontSize: 14, marginBottom: 4, textAlign: "center" }}>
+        <span className="crimson">STRUZON</span> <span className="navy">Technologies</span>
+      </div>
+      <h2 style={{ textAlign: "center" }}>Admin login</h2>
       <form onSubmit={handleSubmit} className="card">
         <label htmlFor="username" style={{ display: "block", marginBottom: 4 }}>
           Username
@@ -35,7 +38,7 @@ export function AdminLogin() {
           id="username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
-          style={{ width: "100%", padding: 8, marginBottom: 12, borderRadius: 6, border: "1px solid var(--border)" }}
+          style={{ width: "100%", padding: 8, marginBottom: 12, borderRadius: 6 }}
           autoComplete="username"
         />
 
@@ -47,30 +50,17 @@ export function AdminLogin() {
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          style={{ width: "100%", padding: 8, marginBottom: 16, borderRadius: 6, border: "1px solid var(--border)" }}
+          style={{ width: "100%", padding: 8, marginBottom: 16, borderRadius: 6 }}
           autoComplete="current-password"
         />
 
         {error && (
-          <p style={{ color: "var(--status-critical)" }} role="alert">
+          <p className="alert-error" role="alert">
             {error}
           </p>
         )}
 
-        <button
-          type="submit"
-          disabled={submitting}
-          style={{
-            width: "100%",
-            padding: 10,
-            borderRadius: 6,
-            border: "none",
-            background: "var(--series-1)",
-            color: "#fff",
-            fontWeight: 600,
-            cursor: "pointer",
-          }}
-        >
+        <button type="submit" className="btn-primary" disabled={submitting} style={{ width: "100%" }}>
           {submitting ? "Signing in..." : "Sign in"}
         </button>
       </form>

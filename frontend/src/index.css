@@ -1,61 +1,112 @@
 :root {
   color-scheme: light;
-  --surface-1: #fcfcfb;
-  --page-plane: #f9f9f7;
-  --text-primary: #0b0b0b;
-  --text-secondary: #52514e;
-  --text-muted: #898781;
-  --gridline: #e1e0d9;
-  --baseline: #c3c2b7;
-  --border: rgba(11, 11, 11, 0.1);
 
-  --series-1: #2a78d6; /* blue */
-  --series-2: #eb6834; /* orange */
-  --series-3: #1baf7a; /* aqua */
-  --series-4: #eda100; /* yellow */
+  /* Crimson - the "STRUZON" wordmark. Primary buttons, errors, text selection. */
+  --crimson-50: #fef2f2;
+  --crimson-100: #fde3e3;
+  --crimson-200: #facbcb;
+  --crimson-300: #f4a3a3;
+  --crimson-400: #e86a6a;
+  --crimson-500: #d32f2f;
+  --crimson-600: #b00000;
+  --crimson-700: #930000;
+  --crimson-800: #780606;
+  --crimson-900: #5e0a0a;
+  --crimson-950: #360303;
+
+  /* Navy - the "Technologies" text. Headings, navy button, brand stripe. */
+  --navy-50: #eff2fa;
+  --navy-100: #dce2f3;
+  --navy-200: #b9c5e7;
+  --navy-300: #8b9ed4;
+  --navy-400: #5671ba;
+  --navy-500: #2b4a9e;
+  --navy-600: #0e318a;
+  --navy-700: #002078;
+  --navy-800: #031a60;
+  --navy-900: #07154a;
+  --navy-950: #040c2c;
+
+  /* Ocean - the blue of the "T" in the logo. Focus rings, input focus. */
+  --ocean-50: #eef7fb;
+  --ocean-100: #d5ebf4;
+  --ocean-200: #abd6e9;
+  --ocean-300: #74b8d6;
+  --ocean-400: #3a93be;
+  --ocean-500: #0a6a9a;
+  --ocean-600: #005880;
+  --ocean-700: #084868;
+  --ocean-800: #0a3b55;
+  --ocean-900: #0b3046;
+
+  /* Ember - the red-orange of the "S" in the logo. Accent color. */
+  --ember-50: #fff5ee;
+  --ember-100: #fee7d6;
+  --ember-200: #fccaaa;
+  --ember-300: #f8a574;
+  --ember-400: #ee7a45;
+  --ember-500: #c85020;
+  --ember-600: #b02820;
+  --ember-700: #921f1a;
+  --ember-800: #761c18;
+  --ember-900: #5f1916;
+
+  /* Neutrals - Tailwind slate */
+  --slate-50: #f8fafc;
+  --slate-200: #e2e8f0;
+  --slate-300: #cbd5e1;
+  --slate-400: #94a3b8;
+  --slate-500: #64748b;
+  --slate-800: #1e293b;
+  --slate-900: #0f172a;
+
+  /* Semantic roles */
+  --page-plane: var(--slate-50);
+  --surface-1: #ffffff;
+  --text-primary: var(--slate-800);
+  --text-secondary: var(--slate-500);
+  --text-muted: var(--slate-400);
+  --border: var(--slate-200);
+  --border-input: var(--slate-300);
+  --gridline: var(--slate-200);
+  --baseline: var(--slate-300);
+
+  --color-primary: var(--crimson-600);
+  --color-primary-hover: var(--crimson-700);
+  --color-navy: var(--navy-700);
+  --color-title: var(--navy-900);
+  --color-focus-ring: var(--ocean-500);
+
+  --alert-error-bg: var(--crimson-50);
+  --alert-error-border: var(--crimson-200);
+  --alert-error-text: var(--crimson-800);
+
+  --shadow-card: 0 1px 2px rgba(15, 23, 42, 0.05);
+  --shadow-lift: 0 8px 24px rgba(15, 23, 42, 0.12);
+
+  /* Chart series: primary = crimson, accent = ember */
+  --series-1: var(--crimson-600);
+  --series-2: var(--ember-500);
+  --series-3: var(--navy-500);
+  --series-4: var(--ocean-500);
 
   --status-good: #0ca30c;
   --status-warning: #fab219;
-  --status-serious: #ec835a;
-  --status-critical: #d03b3b;
-
-  --seq-100: #cde2fb;
-  --seq-400: #3987e5;
-  --seq-700: #0d366b;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    color-scheme: dark;
-    --surface-1: #1a1a19;
-    --page-plane: #0d0d0d;
-    --text-primary: #ffffff;
-    --text-secondary: #c3c2b7;
-    --text-muted: #898781;
-    --gridline: #2c2c2a;
-    --baseline: #383835;
-    --border: rgba(255, 255, 255, 0.1);
-
-    --series-1: #3987e5;
-    --series-2: #d95926;
-    --series-3: #199e70;
-    --series-4: #c98500;
-
-    --status-good: #0ca30c;
-    --status-warning: #fab219;
-    --status-serious: #ec835a;
-    --status-critical: #e66767;
-  }
+  --status-serious: var(--ember-500);
+  --status-critical: var(--crimson-600);
 }
 
 * {
   box-sizing: border-box;
 }
 
-html,
+html {
+  height: 100%;
+}
+
 body,
 #root {
-  height: 100%;
+  min-height: 100%;
 }
 
 body {
@@ -69,6 +120,12 @@ body {
     sans-serif;
 }
 
+h1,
+h2,
+h3 {
+  color: var(--color-title);
+}
+
 input,
 select,
 textarea,
@@ -77,7 +134,28 @@ button {
 }
 
 a {
-  color: var(--series-1);
+  color: var(--ocean-600);
+}
+
+::selection {
+  background: var(--crimson-200);
+  color: var(--navy-900);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 2px;
+}
+
+input,
+select,
+textarea {
+  border: 1px solid var(--border-input);
+}
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--color-focus-ring);
 }
 
 .card {
@@ -85,6 +163,7 @@ a {
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 20px;
+  box-shadow: var(--shadow-card);
 }
 
 .muted {
@@ -93,4 +172,278 @@ a {
 
 .secondary {
   color: var(--text-secondary);
+}
+
+.brand-mark {
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+.brand-mark .crimson {
+  color: var(--crimson-600);
+}
+.brand-mark .navy {
+  color: var(--navy-700);
+}
+
+.btn-primary {
+  padding: 12px 24px;
+  border-radius: 8px;
+  border: none;
+  background: var(--color-primary);
+  color: #ffffff;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-primary:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+}
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.alert-error {
+  background: var(--alert-error-bg);
+  border: 1px solid var(--alert-error-border);
+  color: var(--alert-error-text);
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin: 0 0 16px;
+}
+
+/* ============================================================
+   Public feedback portal - premium liquid-glass theme.
+   Scoped to .feedback-portal so the admin theme above is untouched.
+   White-dominant base, crimson (red) as the strong lining/accent
+   color, ocean blue kept to a small touch (focus states, one glow,
+   the wordmark) rather than driving the palette.
+   ============================================================ */
+.feedback-portal {
+  position: relative;
+  min-height: 100vh;
+  background: linear-gradient(180deg, #ffffff 0%, var(--slate-50) 100%);
+  color: var(--slate-800);
+  padding: 56px 20px 80px;
+}
+
+.fp-glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  pointer-events: none;
+  z-index: 0;
+}
+.fp-glow-crimson {
+  top: -140px;
+  left: -120px;
+  width: 480px;
+  height: 480px;
+  background: radial-gradient(circle, var(--crimson-300) 0%, transparent 70%);
+  opacity: 0.35;
+}
+.fp-glow-ocean {
+  bottom: -160px;
+  right: -140px;
+  width: 420px;
+  height: 420px;
+  background: radial-gradient(circle, var(--ocean-200) 0%, transparent 70%);
+  opacity: 0.3;
+}
+
+.fp-content {
+  position: relative;
+  z-index: 1;
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.fp-eyebrow {
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  font-size: 13px;
+  text-transform: uppercase;
+}
+.fp-eyebrow .crimson {
+  color: var(--crimson-600);
+}
+.fp-eyebrow .navy {
+  color: var(--ocean-600);
+  font-weight: 500;
+}
+
+.fp-title {
+  font-size: 34px;
+  font-weight: 800;
+  color: var(--navy-900);
+  margin: 14px 0 10px;
+  letter-spacing: -0.01em;
+}
+
+.fp-subtitle {
+  color: var(--slate-500);
+  font-size: 15px;
+  line-height: 1.6;
+  margin: 0 0 40px;
+  max-width: 52ch;
+}
+
+.fp-section {
+  margin-bottom: 32px;
+  padding-top: 28px;
+}
+.fp-section:first-of-type {
+  padding-top: 0;
+}
+.fp-section + .fp-section {
+  border-top: 1px solid var(--slate-200);
+}
+
+.fp-section-header {
+  margin-bottom: 18px;
+}
+
+.fp-section-kicker {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--crimson-600);
+  margin-bottom: 6px;
+}
+.fp-section-kicker::before {
+  content: "";
+  display: inline-block;
+  width: 18px;
+  height: 2px;
+  background: var(--crimson-500);
+  border-radius: 2px;
+}
+
+.fp-section-title {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--navy-900);
+}
+
+.fp-section-hint {
+  font-size: 13px;
+  color: var(--slate-500);
+  margin: 4px 0 0;
+}
+
+.fp-glass {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid var(--slate-200);
+  border-top: 3px solid var(--crimson-500);
+  border-radius: 18px;
+  padding: 28px;
+  box-shadow:
+    0 8px 28px rgba(15, 23, 42, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.fp-textarea {
+  width: 100%;
+  padding: 16px;
+  border-radius: 14px;
+  resize: vertical;
+  background: #ffffff;
+  border: 1px solid var(--slate-300);
+  color: var(--slate-800);
+  font-size: 15px;
+  line-height: 1.6;
+}
+.fp-textarea::placeholder {
+  color: var(--slate-400);
+}
+.fp-textarea:focus {
+  outline: none;
+  border-color: var(--ocean-500);
+  box-shadow: 0 0 0 4px rgba(10, 106, 154, 0.15);
+}
+
+.fp-question {
+  padding: 22px 0;
+  border-bottom: 1px solid var(--slate-200);
+}
+.fp-question:first-child {
+  padding-top: 0;
+}
+.fp-question:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.fp-question-text {
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--slate-800);
+  margin-bottom: 14px;
+}
+
+.fp-pill {
+  padding: 9px 18px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--slate-300);
+  background: #ffffff;
+  color: var(--slate-800);
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.1s ease;
+}
+.fp-pill:hover {
+  border-color: var(--ocean-300);
+  background: var(--ocean-50);
+}
+.fp-pill.selected {
+  background: linear-gradient(135deg, var(--crimson-500), var(--crimson-700));
+  border-color: var(--crimson-600);
+  color: #ffffff;
+  box-shadow: 0 4px 16px rgba(176, 0, 0, 0.3);
+  transform: translateY(-1px);
+}
+
+.fp-alert-error {
+  background: var(--crimson-50);
+  border: 1px solid var(--crimson-200);
+  color: var(--crimson-800);
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin: 0 0 20px;
+  font-size: 14px;
+}
+
+.fp-submit {
+  width: 100%;
+  padding: 16px;
+  border-radius: 14px;
+  border: none;
+  background: linear-gradient(135deg, var(--crimson-500), var(--crimson-700));
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(176, 0, 0, 0.3);
+  transition:
+    transform 0.12s ease,
+    box-shadow 0.12s ease;
+}
+.fp-submit:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 28px rgba(176, 0, 0, 0.38);
+}
+.fp-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
 }

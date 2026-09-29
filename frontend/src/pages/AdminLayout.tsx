@@ -14,37 +14,51 @@ export function AdminLayout() {
     padding: "8px 14px",
     borderRadius: 6,
     textDecoration: "none",
-    color: isActive ? "#fff" : "var(--text-primary)",
-    background: isActive ? "var(--series-1)" : "transparent",
+    color: "#ffffff",
+    background: isActive ? "rgba(255, 255, 255, 0.18)" : "transparent",
+    opacity: isActive ? 1 : 0.8,
   });
 
   return (
     <div>
+      {/* Brand stripe - navy-700, per the Struzon brand kit's "navy button / brand stripe" role */}
       <header
         style={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
           padding: "12px 24px",
-          borderBottom: "1px solid var(--border)",
+          background: "var(--navy-700)",
         }}
       >
-        <nav style={{ display: "flex", gap: 8 }}>
-          <NavLink to="/admin" end style={linkStyle}>
-            Submissions
-          </NavLink>
-          <NavLink to="/admin/stats" style={linkStyle}>
-            Statistics
-          </NavLink>
-          <NavLink to="/admin/repeated-names" style={linkStyle}>
-            Repeated names
-          </NavLink>
-        </nav>
+        <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
+          <span style={{ color: "#ffffff", fontWeight: 700, letterSpacing: "0.02em" }}>
+            STRUZON <span style={{ fontWeight: 400, opacity: 0.85 }}>Technologies</span>
+          </span>
+          <nav style={{ display: "flex", gap: 8 }}>
+            <NavLink to="/admin" end style={linkStyle}>
+              Submissions
+            </NavLink>
+            <NavLink to="/admin/stats" style={linkStyle}>
+              Statistics
+            </NavLink>
+            <NavLink to="/admin/repeated-names" style={linkStyle}>
+              Repeated names
+            </NavLink>
+          </nav>
+        </div>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <span className="muted">{username}</span>
+          <span style={{ color: "#ffffff", opacity: 0.8 }}>{username}</span>
           <button
             onClick={handleLogout}
-            style={{ padding: "6px 12px", borderRadius: 6, border: "1px solid var(--border)", background: "transparent", cursor: "pointer" }}
+            style={{
+              padding: "6px 12px",
+              borderRadius: 6,
+              border: "1px solid rgba(255, 255, 255, 0.4)",
+              background: "transparent",
+              color: "#ffffff",
+              cursor: "pointer",
+            }}
           >
             Log out
           </button>
