@@ -13,3 +13,4 @@ frontend/.env
 .DS_Store
 *.log
 .claude/
+venv/
