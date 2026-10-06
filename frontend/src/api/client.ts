@@ -1,6 +1,7 @@
 import type {
   AdminInfo,
   FeedbackSubmitPayload,
+  PowChallenge,
   Question,
   Stats,
   SubmissionDetail,
@@ -44,6 +45,8 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
 export const api = {
   getQuestions: () => request<Question[]>("/api/questions"),
+
+  getPowChallenge: () => request<PowChallenge>("/api/pow-challenge"),
 
   submitFeedback: (payload: FeedbackSubmitPayload) =>
     request("/api/feedback", { method: "POST", body: JSON.stringify(payload) }),

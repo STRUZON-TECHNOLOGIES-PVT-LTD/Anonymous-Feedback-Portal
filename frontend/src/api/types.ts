@@ -20,12 +20,24 @@ export interface DeviceInfo {
   fingerprint_hash?: string;
 }
 
+export interface PowChallenge {
+  salt: string;
+  exp: number;
+  bits: number;
+  sig: string;
+}
+
+export interface PowSolution extends PowChallenge {
+  nonce: string;
+}
+
 export interface FeedbackSubmitPayload {
   confession_text: string;
   answers: AnswerIn[];
   device: DeviceInfo;
   website: string;
   form_seconds: number;
+  pow: PowSolution;
 }
 
 export interface AdminInfo {

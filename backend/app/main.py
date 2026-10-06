@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from sqlalchemy import select
@@ -52,7 +53,29 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(title="Anonymous Feedback Portal API", lifespan=lifespan)
+app = FastAPI(
+    title="Anonymous Feedback Portal API",
+    lifespan=lifespan,
+    # No public API schema/UI in production.
+    docs_url=None if settings.is_production else "/docs",
+    redoc_url=None if settings.is_production else "/redoc",
+    openapi_url=None if settings.is_production else "/openapi.json",
+)
+
+
+@app.middleware("http")
+async def security_middleware(request, call_next):
+    length = request.headers.get("content-length")
+    if length and length.isdigit() and int(length) > settings.max_body_bytes:
+        return JSONResponse({"detail": "Request body too large"}, status_code=413)
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["Referrer-Policy"] = "no-referrer"
+    response.headers["X-Frame-Options"] = "DENY"
+    if request.url.path.startswith("/api/admin"):
+        response.headers["Cache-Control"] = "no-store"
+    return response
+
 
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
@@ -62,7 +85,7 @@ app.add_middleware(
     allow_origins=settings.frontend_origin_list,
     allow_credentials=True,
     allow_methods=["GET", "POST"],
-    allow_headers=["*"],
+    allow_headers=["Content-Type"],
 )
 
 app.include_router(public.router)

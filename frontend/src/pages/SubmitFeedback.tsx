@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { api } from "../api/client";
-import type { Question } from "../api/types";
+import type { PowSolution, Question } from "../api/types";
+import { solvePow } from "../utils/pow";
 import { collectDeviceInfo } from "../utils/fingerprint";
 import struzonLogo from "../assets/struzon-logo.png";
 
@@ -11,6 +12,17 @@ export function SubmitFeedback() {
   const [status, setStatus] = useState<"idle" | "submitting" | "done" | "error">("idle");
   const [error, setError] = useState("");
   const loadedAt = useRef(Date.now());
+  // Proof-of-work is solved in the background while the user fills the form.
+  const powRef = useRef<Promise<PowSolution> | null>(null);
+
+  function startPow() {
+    powRef.current = api.getPowChallenge().then(solvePow);
+    powRef.current.catch(() => undefined);
+  }
+
+  useEffect(() => {
+    startPow();
+  }, []);
 
   useEffect(() => {
     api
@@ -32,6 +44,7 @@ export function SubmitFeedback() {
     setError("");
 
     try {
+      const pow = await (powRef.current ?? (startPow(), powRef.current!));
       await api.submitFeedback({
         confession_text: confessionText,
         answers: Object.entries(answers).map(([question_id, selected_option]) => ({
@@ -41,9 +54,11 @@ export function SubmitFeedback() {
         device: collectDeviceInfo(),
         website: "",
         form_seconds: (Date.now() - loadedAt.current) / 1000,
+        pow,
       });
       setStatus("done");
     } catch {
+      startPow(); // each challenge is single-use
       setStatus("error");
       setError("Something went wrong submitting your feedback. Please try again.");
     }

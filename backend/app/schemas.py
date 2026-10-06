@@ -30,14 +30,30 @@ class AnswerIn(BaseModel):
     selected_option: str = Field(max_length=200)
 
 
+class PowIn(BaseModel):
+    salt: str = Field(max_length=64)
+    exp: int
+    bits: int
+    sig: str = Field(max_length=128)
+    nonce: str = Field(max_length=32)
+
+
+class PowChallengeOut(BaseModel):
+    salt: str
+    exp: int
+    bits: int
+    sig: str
+
+
 class FeedbackSubmitIn(BaseModel):
     confession_text: str | None = Field(default=None, max_length=5000)
-    answers: list[AnswerIn]
+    answers: list[AnswerIn] = Field(min_length=1, max_length=50)
+    pow: PowIn
     device: DeviceInfoIn = DeviceInfoIn()
     # Honeypot: must stay empty. Real users never see or fill this field.
     website: str = Field(default="", max_length=200)
     # Seconds between the client rendering the form and submitting it.
-    form_seconds: float | None = Field(default=None, ge=0)
+    form_seconds: float = Field(ge=0, le=86400)
 
     @field_validator("confession_text")
     @classmethod

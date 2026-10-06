@@ -1,14 +1,16 @@
+import uuid
 from datetime import datetime, timedelta, timezone
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
-from sqlalchemy import func, select
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, status
+from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.config import get_settings
 from app.database import get_db
-from app.deps import get_current_admin
-from app.models import Admin, Answer, ExtractedName, Question, Submission
+from app.deps import audit, get_current_admin
+from app.models import Admin, AdminSession, Answer, ExtractedName, Question, Submission
+from app.rate_limit import limiter
 from app.schemas import (
     AdminLoginIn,
     AdminOut,
@@ -22,7 +24,13 @@ from app.schemas import (
     SubmissionListItem,
     SubmissionListOut,
 )
-from app.security import COOKIE_NAME, create_access_token, verify_password
+from app.security import (
+    COOKIE_NAME,
+    create_access_token,
+    decode_access_token,
+    verify_dummy_password,
+    verify_password,
+)
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
 settings = get_settings()
@@ -33,31 +41,58 @@ REPEATED_FINGERPRINT_MIN_COUNT = 2
 
 
 @router.post("/login", response_model=AdminOut)
-async def login(payload: AdminLoginIn, response: Response, db: AsyncSession = Depends(get_db)):
+@limiter.limit(settings.login_rate_limit)
+async def login(request: Request, payload: AdminLoginIn, response: Response, db: AsyncSession = Depends(get_db)):
+    invalid = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+    now = datetime.now(timezone.utc)
+
     result = await db.execute(select(Admin).where(Admin.username == payload.username))
     admin = result.scalar_one_or_none()
 
-    if not admin or not verify_password(payload.password, admin.password_hash):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+    # Always burn one bcrypt verify and return the same generic error for
+    # unknown user / locked account / wrong password (no enumeration oracle).
+    locked = bool(admin and admin.locked_until and admin.locked_until > now)
+    if not admin or locked:
+        verify_dummy_password(payload.password)
+        await audit(db, request, "login_locked" if locked else "login_failed", payload.username[:100])
+        raise invalid
 
-    admin.last_login_at = datetime.now(timezone.utc)
+    if not verify_password(payload.password, admin.password_hash):
+        admin.failed_attempts += 1
+        if admin.failed_attempts >= settings.login_max_failed_attempts:
+            admin.locked_until = now + timedelta(minutes=settings.login_lockout_minutes)
+            admin.failed_attempts = 0
+        await db.commit()
+        await audit(db, request, "login_failed", admin.username)
+        raise invalid
+
+    admin.failed_attempts = 0
+    admin.locked_until = None
+    admin.last_login_at = now
+
+    token, jti, expires_at = create_access_token(admin.username)
+    db.add(AdminSession(jti=jti, admin_id=admin.id, expires_at=expires_at))
     await db.commit()
+    await audit(db, request, "login_ok", admin.username)
 
-    token = create_access_token(admin.username)
     response.set_cookie(
         key=COOKIE_NAME,
         value=token,
         httponly=True,
         secure=settings.cookie_secure,
-        samesite="lax",
+        samesite="strict",
         max_age=settings.jwt_expire_minutes * 60,
     )
     return AdminOut(username=admin.username)
 
 
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
-async def logout(response: Response):
-    response.delete_cookie(COOKIE_NAME)
+async def logout(request: Request, response: Response, db: AsyncSession = Depends(get_db)):
+    claims = decode_access_token(request.cookies.get(COOKIE_NAME, ""))
+    if claims:
+        await db.execute(update(AdminSession).where(AdminSession.jti == claims["jti"]).values(revoked=True))
+        await db.commit()
+    response.delete_cookie(COOKIE_NAME, secure=settings.cookie_secure, httponly=True, samesite="strict")
 
 
 @router.get("/me", response_model=AdminOut)
@@ -67,11 +102,13 @@ async def me(admin: Admin = Depends(get_current_admin)):
 
 @router.get("/submissions", response_model=SubmissionListOut)
 async def list_submissions(
+    request: Request,
     page: int = Query(default=1, ge=1),
     page_size: int = Query(default=20, ge=1, le=100),
     admin: Admin = Depends(get_current_admin),
     db: AsyncSession = Depends(get_db),
 ):
+    await audit(db, request, "view_submissions_list", admin.username, f"page={page}")
     total = (await db.execute(select(func.count()).select_from(Submission))).scalar_one()
 
     result = await db.execute(
@@ -102,10 +139,12 @@ async def list_submissions(
 
 @router.get("/submissions/{submission_id}", response_model=SubmissionDetail)
 async def get_submission(
-    submission_id: str,
+    request: Request,
+    submission_id: uuid.UUID,
     admin: Admin = Depends(get_current_admin),
     db: AsyncSession = Depends(get_db),
 ):
+    await audit(db, request, "view_submission", admin.username, str(submission_id))
     result = await db.execute(
         select(Submission)
         .where(Submission.id == submission_id)
@@ -138,7 +177,8 @@ async def get_submission(
 
 
 @router.get("/stats", response_model=StatsOut)
-async def get_stats(admin: Admin = Depends(get_current_admin), db: AsyncSession = Depends(get_db)):
+async def get_stats(request: Request, admin: Admin = Depends(get_current_admin), db: AsyncSession = Depends(get_db)):
+    await audit(db, request, "view_stats", admin.username)
     total_submissions = (await db.execute(select(func.count()).select_from(Submission))).scalar_one()
 
     since = datetime.now(timezone.utc) - timedelta(days=30)
@@ -196,10 +236,12 @@ async def get_stats(admin: Admin = Depends(get_current_admin), db: AsyncSession 
 
 @router.get("/repeated-names", response_model=list[RepeatedName])
 async def repeated_names(
+    request: Request,
     min_count: int = Query(default=REPEATED_NAME_MIN_COUNT, ge=1),
     admin: Admin = Depends(get_current_admin),
     db: AsyncSession = Depends(get_db),
 ):
+    await audit(db, request, "view_repeated_names", admin.username)
     return await _repeated_names(db, min_count=min_count, limit=100)
 
 
